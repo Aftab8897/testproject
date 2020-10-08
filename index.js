@@ -1,94 +1,86 @@
-'use strict'
+'user strict'
 const express = require('express');
-var cors = require('cors');
-const app = express();
-var nodemailer = require('nodemailer');
+var cors= require('cors');
+const app= express();
 var bodyParser = require('body-parser');
-//const web3= require('web3');
-app.use(bodyParser.json()); // for parsing application/json
-app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
 
 app.options('*',cors());
 app.use(cors());
-const port = 5000;
-var mongoUtil = require( './mongoUtil' );
+const port=8080;
 
-mongoUtil.connectToServer( function( err, client ) {
-  if (err) console.log(err);
-  // start the rest of your app here
-} );
+var mongoUtil = require( './mongoUtil');
+mongoUtil.connectToServer(function(err,client){
+    if(err) console.log(err);
+    console.log('running mongo db');
+});
+app.post('/get_data',(req,res)=>{
+    var dbo = mongoUtil.getDb();
+      var data = req.body;
+     
+       var query= { imei: data.imei};
+     
+   dbo.collection("vendors_data").find(query).toArray(function(err,result){
+    if(err) {res.json({'error':'1','msg':err});   }      
 
-app.get('/receive_data',(req,res)=>{
-     var dbo = mongoUtil.getDb();
-    dbo.createCollection("vendors", function(err, res) {
-   
-  });
-   dbo.createCollection("vendors_weight", function(err, res) {
-   
-  });
-    var data= req.body;
-   
+    if(result.length>0)
+    {
+      //  console.log(result);
+        res.json({'error':'0','msg':'successfull','data':result});         
+      
+    }
+    else
+    {
+    res.json({'error':'1','msg':'no data found'});         
 
-     var query={ imei: data.imei };//"SELECT * FROM vendors WHERE imei = '"+data.imei+"'";
-   dbo.collection("vendors").find(query).toArray(function(err, result) {
-    if (err) throw err;
-   if(result.length>0)
-   {
-   
-    console.log(result);
-  //  console.log(data.imei);
-   } 
-   else
-   {
-    let vals= data.values;
-/* dbo.collection("customers").updateOne(myquery, newvalues, function(err, res) {
-    if (err) throw err;
-    console.log("1 document updated");
-    db.close();
-  });*/
-    vals.systolic= Math.round((vals.systolic/133.322));
-    vals.diastolic= Math.round((vals.diastolic/133.322));
-    
-    dbo.collection("vendors").insertOne(data, function(err, res) {
-    if (err) throw err;
-   
-   
-  });
-   }
-   
-  });
-  return false;
+    }
+});
+});
+app.post('/receive_vendor',(req,res)=>{
   
-});
-  
- 
-/*app.post('/sendEmail',(req,res)=>{
-    var email = req.body.email;
-   var first_name= req.body.first_name;
-  var last_name= req.body.last_name;
-  var msg= req.body.msg;
-  console.log(email);
-     var transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'email here',
-    pass: 'email password'
-  }
-});
-    var mailOptions = {
-  from: 'email here',
-  to: email,
-  subject: first_name,
-  html: msg
-};
-transporter.sendMail(mailOptions, function(error, info){
-  if (error) {
-   res.json({'error':error});
-  } else {
-   res.json({'error':'0'});
-  }
-});
+    var dbo = mongoUtil.getDb();
+   /* dbo.createCollection('vendors_data', function(err,res){
+        if(err) console.log(err);
+        console.log('vendors_data collection created');
+    } );*/
+    var data = req.body;
+   
+   var query= { imei: data.imei};
+   dbo.collection("vendors_data").find(query).toArray(function(err,result){
+    if(err) throw err;
+    if(result.length>0)
+    {
+        res.json({'error':'1','msg':'imei already exist'});         
+      
+    }
+    else
+    {
+        let vals= data.values;
+        if(typeof vals.systolic === 'object' && vals.systolic !== null)
+        {
+             vals.systolic= Math.round((vals.systolic/133.322));
+      
+        }
+        if(typeof vals.diastolic === 'object' && vals.diastolic !== null )
+        {
+              vals.diastolic= Math.round((vals.diastolic/133.322));
+     
+        }
+      
+       dbo.collection('vendors_data').insertOne(data, function(err,ress){
+        if(err){ res.json({'error':'1','msg':err});}
+        else
+        {
+            res.json({'error':'0','msg':'data inserted successfully'}); 
+        } 
+       
+       });
+    }
+   });
     
 });
-*/
-app.listen(port, () => 'server running on port '+port);
+
+
+app.listen(port, console.log('server running on port '+ port) );
