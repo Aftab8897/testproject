@@ -9,7 +9,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 
 app.options('*',cors());
 app.use(cors());
-const port=8080;
+const port=3000;
 
 var mongoUtil = require( './mongoUtil');
 mongoUtil.connectToServer(function(err,client){
