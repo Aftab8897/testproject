@@ -10,7 +10,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.options('*',cors());
 app.use(cors());
 app.use(express.static(__dirname + '/views'));
-const port=3000;
+const port=80;
 
 var mongoUtil = require( './mongoUtil');
 mongoUtil.connectToServer(function(err,client){
