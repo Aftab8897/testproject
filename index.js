@@ -1,28 +1,29 @@
 'user strict'
 const express = require('express');
 var cors= require('cors');
-const http = require('http');
 const app= express();
 var bodyParser = require('body-parser');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
-
 app.options('*',cors());
 app.use(cors());
-app.use(express.static(__dirname + '/views'));
-const port=80;
-http.createServer(app).listen(8080,function(){
-console.log('Server Starteds');
-});
+const port=3000;
+
 var mongoUtil = require( './mongoUtil');
 mongoUtil.connectToServer(function(err,client){
     if(err) console.log(err);
     console.log('running mongo db');
 });
+app.get('/', (req, res) => {
 
+   console.log('hi');
+  
+
+
+
+});
 app.post('/get_data',(req,res)=>{
-    console.log('hi');
     var dbo = mongoUtil.getDb();
       var data = req.body;
      
@@ -89,4 +90,4 @@ app.post('/receive_vendor',(req,res)=>{
 });
 
 
-//app.listen(port, console.log('server running on port '+ port) );
+app.listen(port, console.log('server running on port '+ port) );
