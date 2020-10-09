@@ -17,15 +17,7 @@ mongoUtil.connectToServer(function(err,client){
     if(err) console.log(err);
     console.log('running mongo db');
 });
-app.get('/', (req, res) => {
 
-  
-    res.render('login');
-  
-
-
-
-});
 app.post('/get_data',(req,res)=>{
     console.log('hi');
     var dbo = mongoUtil.getDb();
